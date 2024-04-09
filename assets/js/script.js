@@ -3,6 +3,7 @@ let cityInput = document.getElementById('city-input');
 let queryURL;
 const searchedEl = document.getElementById('searched-cities');
 let searchedCities = JSON.parse(localStorage.getItem('locations')) || []; // Retrieve searched city names from localStorage
+ 
 function displaySearchedCities() {
     searchedEl.innerHTML = ""; // Clear existing city names
     searchedCities.forEach(city => {
@@ -38,7 +39,7 @@ function init() {
         cityDisplay.classList.add('city-name'); // Add a class to the city name element
         searchedEl.appendChild(cityDisplay);
         cityInput.value = "";
-
+ 
         // Scroll to the city name element
         // Add the city to the searchedCities array
         searchedCities.push(city);
@@ -50,15 +51,19 @@ function init() {
 }
 function fetchWeatherData(city) {
     queryURL = `http://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${APIKey}`;
-    searchedEl.innerHTML = "";
-
+ 
     fetch(queryURL)
         .then(response => response.json())
         .then(data => {
             const forecastList = data.list;
             const forecastContainer = document.createElement('div');
             forecastContainer.classList.add('forecast-container');
-
+ 
+            // Display the city name
+            const cityName = document.createElement('h2');
+            cityName.textContent = city;
+            searchedEl.appendChild(cityName);
+ 
             for (let i = 0; i < forecastList.length; i += 8) {
                 const forecastData = forecastList[i];
                 const date = new Date(forecastData.dt * 1000).toLocaleDateString();
@@ -66,10 +71,10 @@ function fetchWeatherData(city) {
                 const temperature = forecastData.main.temp;
                 const humidity = forecastData.main.humidity;
                 const windSpeed = forecastData.wind.speed;
-
+ 
                 const forecastItemContainer = document.createElement('div');
                 forecastItemContainer.classList.add('forecast-item-container');
-
+ 
                 const forecastElement = document.createElement('div');
                 forecastElement.classList.add('forecast-item');
                 forecastElement.innerHTML = `
@@ -79,21 +84,17 @@ function fetchWeatherData(city) {
                     <p>Humidity: ${humidity}%</p>
                     <p>Wind Speed: ${windSpeed} m/s</p>
                 `;
-
+ 
                 forecastItemContainer.appendChild(forecastElement);
                 forecastContainer.appendChild(forecastItemContainer);
             }
-
+ 
             searchedEl.appendChild(forecastContainer);
-
+ 
             // Add the searched city to the search history
             searchedLocations.push(city);
-            localStorage.setItem('locations', JSON.stringify(searchedLocations));
-        })
-        .catch(error => {
-            console.error('Error fetching weather data:', error);
+            localStorage.setItem('searchedLocations', JSON.stringify(searchedLocations));
         });
 }
-
+ 
 init();
-
